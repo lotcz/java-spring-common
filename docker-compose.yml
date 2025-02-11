@@ -1,0 +1,20 @@
+services:
+  build:
+    image: maven:3.9.2-amazoncorretto-17-debian
+    volumes:
+      - .:/app
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn -U clean package
+
+  deploy:
+    image: maven:3.9.2-amazoncorretto-17-debian
+    volumes:
+      - .:/app
+      - maven-cache:/root/.m2
+    working_dir: /app
+    command: mvn -U clean install
+
+volumes:
+  maven-cache:
+    driver: local
