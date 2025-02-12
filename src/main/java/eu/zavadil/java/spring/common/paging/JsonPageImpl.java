@@ -12,7 +12,7 @@ public class JsonPageImpl<T> implements JsonPage<T> {
 		this.page = page;
 	}
 
-	static <T> JsonPage<T> of(Page<T> page) {
+	public static <T> JsonPage<T> of(Page<T> page) {
 		return new JsonPageImpl<>(page);
 	}
 
