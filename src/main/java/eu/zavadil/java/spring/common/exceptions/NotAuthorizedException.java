@@ -10,10 +10,6 @@ public class NotAuthorizedException extends RuntimeException {
 		return String.format("Unauthorized access to %s/%s", resourceName, resourceId);
 	}
 
-	static String createMessage(String resourceName) {
-		return String.format("Unauthorized access to %s", resourceName);
-	}
-
 	public NotAuthorizedException(String resourceName, String resourceId, Throwable cause) {
 		super(createMessage(resourceName, resourceId), cause);
 	}
@@ -22,12 +18,12 @@ public class NotAuthorizedException extends RuntimeException {
 		super(createMessage(resourceName, resourceId));
 	}
 
-	public NotAuthorizedException(String resourceName, Throwable cause) {
-		super(createMessage(resourceName), cause);
+	public NotAuthorizedException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	public NotAuthorizedException(String resourceName) {
-		super(createMessage(resourceName));
+	public NotAuthorizedException(String message) {
+		super(message);
 	}
 
 }

@@ -16,6 +16,8 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 	@Getter
 	private boolean loading;
 
+	private int processed;
+
 	protected Page<T> currentPage = null;
 
 	public PagedSmartQueue() {
@@ -24,12 +26,13 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 	public void reload() {
 		this.loading = true;
 		this.currentPage = this.loadRemaining();
-		this.loading = false;
 		this.currentItemNumber = 0;
+		this.loading = false;
 	}
 
 	@Override
 	public void reset() {
+		this.processed = 0;
 		this.currentPage = null;
 		this.currentItemNumber = 0;
 	}
@@ -37,31 +40,40 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 	public abstract Page<T> loadRemaining();
 
 	public boolean needsReload() {
-		return (this.currentPage == null || this.currentPage.getNumberOfElements() <= this.currentItemNumber);
+		return (this.currentPage == null || this.currentPage.getNumberOfElements() <= this.currentItemNumber)
+			&& !this.loading;
+	}
+
+	protected synchronized void checkReload() {
+		if (this.needsReload()) {
+			this.reload();
+		}
 	}
 
 	@Override
 	public T next() {
-		if (this.needsReload()) {
-			this.reload();
-		}
+		this.checkReload();
 		List<T> content = this.currentPage.getContent();
 		T result = content.size() > this.currentItemNumber ? content.get(this.currentItemNumber) : null;
 		this.currentItemNumber++;
+		this.processed++;
 		return result;
 	}
 
 	@Override
 	public long getRemaining() {
-		if (this.needsReload()) {
-			this.reload();
-		}
-		return this.currentPage.getTotalElements() - this.currentItemNumber;
+		this.checkReload();
+		return this.currentPage == null ? 0 : this.currentPage.getTotalElements() - this.processed;
 	}
 
 	@Override
 	public int getLoaded() {
 		return this.currentPage == null ? 0 : this.currentPage.getNumberOfElements();
+	}
+
+	@Override
+	public int getProcessed() {
+		return this.processed;
 	}
 
 }

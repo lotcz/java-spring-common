@@ -6,6 +6,7 @@ import eu.zavadil.java.queues.SmartQueueProcessorState;
 import eu.zavadil.java.queues.SmartQueueProcessorStats;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 
 @Slf4j
 public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<T> {
@@ -23,22 +24,31 @@ public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<
 	public abstract void processItem(T e);
 
 	@Override
+	@Async
 	public void process() {
 		this.state = SmartQueueProcessorState.Processing;
 		while (this.queue.hasNext()) {
-			log.info("Processing document queue, {} remaining", this.queue.getRemaining());
-			this.processItem(this.queue.next());
+			T n = this.queue.next();
+			if (n == null) {
+				break;
+			}
+			this.processItem(n);
 		}
-		log.info("Document queue empty");
+		log.info("Queue empty, resetting...");
 		this.queue.reset();
 		this.state = SmartQueueProcessorState.Idle;
 	}
 
 	public SmartQueueProcessorStats getStats() {
-		return new SmartQueueProcessorStats(
-			this.queue.getRemaining(),
-			this.queue.getLoaded(),
-			this.queue.isLoading() ? SmartQueueProcessorState.Loading : this.state
-		);
+		SmartQueueProcessorState state = this.queue.isLoading() ? SmartQueueProcessorState.Loading : this.state;
+		if (!state.equals(SmartQueueProcessorState.Idle)) {
+			return new SmartQueueProcessorStats(
+				this.queue.getRemaining(),
+				this.queue.getLoaded(),
+				this.queue.getProcessed(),
+				state
+			);
+		}
+		return new SmartQueueProcessorStats(0, 0, 0, state);
 	}
 }

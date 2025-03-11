@@ -22,8 +22,8 @@ public class JsonPageImpl<T> implements JsonPage<T> {
 	}
 
 	@Override
-	public int getTotalItems() {
-		return this.page.getNumberOfElements();
+	public long getTotalItems() {
+		return this.page.getTotalElements();
 	}
 
 	@Override
