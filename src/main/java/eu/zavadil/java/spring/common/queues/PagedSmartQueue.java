@@ -2,12 +2,10 @@ package eu.zavadil.java.spring.common.queues;
 
 import eu.zavadil.java.queues.SmartQueue;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-@Slf4j
 public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 
 	@Getter
@@ -16,7 +14,7 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 	@Getter
 	private boolean loading;
 
-	private int processed;
+	private long processedCount;
 
 	protected Page<T> currentPage = null;
 
@@ -32,7 +30,7 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 
 	@Override
 	public void reset() {
-		this.processed = 0;
+		this.processedCount = 0;
 		this.currentPage = null;
 		this.currentItemNumber = 0;
 	}
@@ -56,14 +54,14 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 		List<T> content = this.currentPage.getContent();
 		T result = content.size() > this.currentItemNumber ? content.get(this.currentItemNumber) : null;
 		this.currentItemNumber++;
-		this.processed++;
+		this.processedCount++;
 		return result;
 	}
 
 	@Override
-	public long getRemaining() {
+	public long remaining() {
 		this.checkReload();
-		return this.currentPage == null ? 0 : this.currentPage.getTotalElements() - this.processed;
+		return this.currentPage == null ? 0 : this.currentPage.getTotalElements() - this.processedCount;
 	}
 
 	@Override
@@ -72,8 +70,8 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 	}
 
 	@Override
-	public int getProcessed() {
-		return this.processed;
+	public long processed() {
+		return this.processedCount;
 	}
 
 }

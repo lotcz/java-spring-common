@@ -5,10 +5,8 @@ import eu.zavadil.java.queues.SmartQueueProcessor;
 import eu.zavadil.java.queues.SmartQueueProcessorState;
 import eu.zavadil.java.queues.SmartQueueProcessorStats;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 
-@Slf4j
 public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<T> {
 
 	@Getter
@@ -34,7 +32,6 @@ public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<
 			}
 			this.processItem(n);
 		}
-		log.info("Queue empty, resetting...");
 		this.queue.reset();
 		this.state = SmartQueueProcessorState.Idle;
 	}
@@ -43,9 +40,9 @@ public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<
 		SmartQueueProcessorState state = this.queue.isLoading() ? SmartQueueProcessorState.Loading : this.state;
 		if (!state.equals(SmartQueueProcessorState.Idle)) {
 			return new SmartQueueProcessorStats(
-				this.queue.getRemaining(),
+				this.queue.remaining(),
 				this.queue.getLoaded(),
-				this.queue.getProcessed(),
+				this.queue.processed(),
 				state
 			);
 		}
