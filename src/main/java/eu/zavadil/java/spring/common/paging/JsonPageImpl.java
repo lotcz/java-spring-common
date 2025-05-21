@@ -6,33 +6,67 @@ import java.util.List;
 
 public class JsonPageImpl<T> implements JsonPage<T> {
 
-	private final Page<T> page;
+	private List<T> content;
 
-	public JsonPageImpl(Page<T> page) {
-		this.page = page;
+	private int pageNumber;
+
+	private int pageSize;
+
+	private long totalItems;
+
+	public JsonPageImpl(List<T> content, int pageNumber, int pageSize, long totalItems) {
+		this.content = content;
+		this.pageNumber = pageNumber;
+		this.pageSize = pageSize;
+		this.totalItems = totalItems;
 	}
 
-	public static <T> JsonPage<T> of(Page<T> page) {
+	public JsonPageImpl(Page<T> page) {
+		this(page.getContent(), page.getNumber(), page.getSize(), page.getTotalElements());
+	}
+
+	public static <T> JsonPageImpl<T> of(Page<T> page) {
 		return new JsonPageImpl<>(page);
+	}
+
+	public static <T> JsonPageImpl<T> of(List<T> content, int pageNumber, int pageSize, long totalItems) {
+		return new JsonPageImpl<>(content, pageNumber, pageSize, totalItems);
 	}
 
 	@Override
 	public List<T> getContent() {
-		return this.page.getContent();
+		return this.content;
 	}
 
 	@Override
 	public long getTotalItems() {
-		return this.page.getTotalElements();
+		return this.totalItems;
 	}
 
 	@Override
 	public int getPageSize() {
-		return this.page.getSize();
+		return this.pageSize;
 	}
 
 	@Override
 	public int getPageNumber() {
-		return this.page.getNumber();
+		return this.pageNumber;
 	}
+
+	public void setContent(List<T> content) {
+		this.content = content;
+	}
+
+	public void setTotalItems(long totalItems) {
+		this.totalItems = totalItems;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public void setPageNumber(int pageNumber) {
+		this.pageNumber = pageNumber;
+	}
+
 }
