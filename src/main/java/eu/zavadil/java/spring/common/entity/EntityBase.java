@@ -23,24 +23,12 @@ public class EntityBase implements Entity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	public Integer getId() {
-		return this.id;
-	}
-
 	@CreationTimestamp
-	private Instant createdOn;
-
-	public Instant getCreatedOn() {
-		return this.createdOn;
-	}
+	private Instant createdOn = Instant.now();
 
 	@UpdateTimestamp
-	private Instant lastUpdatedOn;
-
-	public Instant getLastUpdatedOn() {
-		return this.lastUpdatedOn;
-	}
-
+	private Instant lastUpdatedOn = Instant.now();
+	
 	protected String sanitizeString(String input) {
 		return StringUtils.blankToNull(StringUtils.safeTrim(input));
 	}
