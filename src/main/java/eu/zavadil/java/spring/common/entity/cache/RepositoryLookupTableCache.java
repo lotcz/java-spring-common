@@ -48,7 +48,7 @@ public class RepositoryLookupTableCache<T extends EntityWithNameBase> extends En
 		return saved;
 	}
 
-	protected T getByName(String name) {
+	public T getByName(String name) {
 		return this.tableCache.get().values().stream()
 			.filter(e -> StringUtils.safeEquals(e.getName(), name))
 			.findAny().orElse(null);

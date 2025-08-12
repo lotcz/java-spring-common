@@ -25,15 +25,18 @@ public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<
 	@Async
 	public void process() {
 		this.state = SmartQueueProcessorState.Processing;
-		while (this.queue.hasNext()) {
-			T n = this.queue.next();
-			if (n == null) {
-				break;
+		try {
+			while (this.queue.hasNext()) {
+				T n = this.queue.next();
+				if (n == null) {
+					break;
+				}
+				this.processItem(n);
 			}
-			this.processItem(n);
+		} finally {
+			this.queue.reset();
+			this.state = SmartQueueProcessorState.Idle;
 		}
-		this.queue.reset();
-		this.state = SmartQueueProcessorState.Idle;
 	}
 
 	public SmartQueueProcessorStats getStats() {

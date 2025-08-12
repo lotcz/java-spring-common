@@ -2,7 +2,7 @@ package eu.zavadil.java.spring.common.entity;
 
 import java.time.Instant;
 
-public interface Entity {
+public interface Entity extends Cloneable {
 
 	Integer getId();
 

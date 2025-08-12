@@ -23,6 +23,9 @@ public class PagingUtils {
 		Map<String, String> result = new HashMap<>();
 		result.put("page", String.valueOf(pr.getPageNumber()));
 		result.put("size", String.valueOf(pr.getPageSize()));
+		if (pr.getSort().isSorted()) {
+			result.put("sorting", SortingUtils.toString(pr.getSort()));
+		}
 		return result;
 	}
 
