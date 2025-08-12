@@ -12,7 +12,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class RepositoryLookupTableCache<T extends EntityWithNameBase> extends EntityCacheBase<T> {
+/**
+ * Cache that keeps all records from table loaded in memory.
+ * Good for small tables.
+ */
+public class RepositoryLookupTableCache<T extends EntityWithNameBase> {
 
 	private final EntityRepository<T> repository;
 
@@ -34,18 +38,17 @@ public class RepositoryLookupTableCache<T extends EntityWithNameBase> extends En
 		return list.stream().collect(Collectors.toMap(EntityBase::getId, item -> item));
 	}
 
-	@Override
-	protected T load(Integer id) {
+	public T get(Integer id) {
 		return this.tableCache.get().get(id);
 	}
 
-	@Override
-	protected T save(T t) {
+	public T set(int id, T t) {
+		return this.tableCache.get().put(t.getId(), t);
+	}
+
+	public T save(T t) {
 		T saved = this.repository.save(t);
-		if (this.tableCache.getCache() != null) {
-			this.tableCache.get().put(t.getId(), t);
-		}
-		return saved;
+		return this.set(t.getId(), saved);
 	}
 
 	public T getByName(String name) {
@@ -54,43 +57,40 @@ public class RepositoryLookupTableCache<T extends EntityWithNameBase> extends En
 			.findAny().orElse(null);
 	}
 
-	protected T obtainInternal(String name) {
+	protected T obtain(String name) {
 		T existing = this.getByName(name);
 		if (existing != null) return existing;
 		T n = this.createSupplier.get();
 		n.setName(name);
-		return n;
-	}
-
-	public T obtain(String name) {
-		name = StringUtils.safeTrim(name);
-		T n = this.obtainInternal(name);
-		n.setName(name);
-		this.set(n);
-		return n;
+		return this.save(n);
 	}
 
 	public List<T> all() {
 		return this.tableCache.get().values().stream().toList();
 	}
 
-	@Override
 	public HashCacheStats getStats() {
 		return (this.tableCache.getCache() == null)
 			? new HashCacheStats(0, 0)
-			: new HashCacheStats(this.tableCache.get().size(), this.maxItems);
+			: new HashCacheStats(this.tableCache.get().size(), 0);
 	}
 
-	@Override
 	public void reset(Integer key) {
-		super.reset(key);
-		this.tableCache.reset();
+		if (this.tableCache.getCache() == null) return;
+		this.tableCache.get().remove(key);
 	}
 
-	@Override
 	public void reset() {
 		this.tableCache.reset();
-		super.reset();
+	}
+
+	public void deleteById(int id) {
+		this.reset(id);
+		this.repository.deleteById(id);
+	}
+
+	public void delete(T t) {
+		this.deleteById(t.getId());
 	}
 
 }
