@@ -4,35 +4,28 @@ import eu.zavadil.java.caching.HashCacheStats;
 import eu.zavadil.java.caching.Lazy;
 import eu.zavadil.java.spring.common.entity.EntityBase;
 import eu.zavadil.java.spring.common.entity.EntityRepository;
-import eu.zavadil.java.spring.common.entity.EntityWithNameBase;
 import eu.zavadil.java.spring.common.paging.PagingUtils;
-import eu.zavadil.java.util.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Cache that keeps all records from table loaded in memory.
  * Good for small tables.
  */
-public class RepositoryLookupTableCache<T extends EntityWithNameBase> {
+public class RepositoryLookupTableCache<T extends EntityBase> {
 
 	protected final EntityRepository<T> repository;
-
-	protected final Supplier<T> createSupplier;
 
 	protected final Lazy<Map<Integer, T>> tableCache;
 
 	public RepositoryLookupTableCache(
-		EntityRepository<T> repository,
-		Supplier<T> createSupplier
+		EntityRepository<T> repository
 	) {
 		this.repository = repository;
-		this.createSupplier = createSupplier;
 		this.tableCache = new Lazy<>(this::loadCache);
 	}
 
@@ -45,27 +38,10 @@ public class RepositoryLookupTableCache<T extends EntityWithNameBase> {
 		return this.tableCache.get().get(id);
 	}
 
-	public T set(int id, T t) {
-		return this.tableCache.get().put(t.getId(), t);
-	}
-
-	public T save(T t) {
+	public T set(T t) {
 		T saved = this.repository.save(t);
-		return this.set(t.getId(), saved);
-	}
-
-	public T getByName(String name) {
-		return this.tableCache.get().values().stream()
-			.filter(e -> StringUtils.safeEquals(e.getName(), name))
-			.findAny().orElse(null);
-	}
-
-	protected T obtain(String name) {
-		T existing = this.getByName(name);
-		if (existing != null) return existing;
-		T n = this.createSupplier.get();
-		n.setName(name);
-		return this.save(n);
+		this.tableCache.get().put(saved.getId(), saved);
+		return t;
 	}
 
 	public List<T> all() {
@@ -74,11 +50,6 @@ public class RepositoryLookupTableCache<T extends EntityWithNameBase> {
 
 	public Page<T> page(PageRequest pr) {
 		return PagingUtils.getPage(this.all(), pr);
-	}
-
-	public Page<T> search(String search, PageRequest pr) {
-		List<T> filtered = this.all().stream().filter(item -> StringUtils.safeContains(item.getName(), search)).toList();
-		return PagingUtils.getPage(filtered, pr);
 	}
 
 	public HashCacheStats getStats() {

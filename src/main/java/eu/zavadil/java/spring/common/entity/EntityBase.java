@@ -39,9 +39,6 @@ public class EntityBase implements Entity {
 
 	/**
 	 * Clone everything, but reset ID
-	 *
-	 * @return
-	 * @throws CloneNotSupportedException
 	 */
 	@Override
 	public Object clone() throws CloneNotSupportedException {
