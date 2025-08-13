@@ -5,7 +5,10 @@ import eu.zavadil.java.caching.Lazy;
 import eu.zavadil.java.spring.common.entity.EntityBase;
 import eu.zavadil.java.spring.common.entity.EntityRepository;
 import eu.zavadil.java.spring.common.entity.EntityWithNameBase;
+import eu.zavadil.java.spring.common.paging.PagingUtils;
 import eu.zavadil.java.util.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public class RepositoryLookupTableCache<T extends EntityWithNameBase> {
 
-	private final EntityRepository<T> repository;
+	protected final EntityRepository<T> repository;
 
 	protected final Supplier<T> createSupplier;
 
@@ -67,6 +70,15 @@ public class RepositoryLookupTableCache<T extends EntityWithNameBase> {
 
 	public List<T> all() {
 		return this.tableCache.get().values().stream().toList();
+	}
+
+	public Page<T> page(PageRequest pr) {
+		return PagingUtils.getPage(this.all(), pr);
+	}
+
+	public Page<T> search(String search, PageRequest pr) {
+		List<T> filtered = this.all().stream().filter(item -> StringUtils.safeContains(item.getName(), search)).toList();
+		return PagingUtils.getPage(filtered, pr);
 	}
 
 	public HashCacheStats getStats() {
