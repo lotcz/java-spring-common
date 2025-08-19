@@ -1,10 +1,7 @@
 package eu.zavadil.java.spring.common.entity;
 
 import eu.zavadil.java.util.StringUtils;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,9 +21,11 @@ public class EntityBase implements Entity {
 	private Integer id;
 
 	@CreationTimestamp
+	@Column(nullable = false)
 	private Instant createdOn = Instant.now();
 
 	@UpdateTimestamp
+	@Column(nullable = false)
 	private Instant lastUpdatedOn = Instant.now();
 
 	protected String sanitizeString(String input) {

@@ -12,7 +12,7 @@ public abstract class EntityWithNameBase extends EntityBase implements EntityWit
 
 	private static final int NAME_SIZE = 255;
 
-	@Column(length = NAME_SIZE)
+	@Column(length = NAME_SIZE, nullable = false)
 	private String name;
 
 	public void setName(String name) {
