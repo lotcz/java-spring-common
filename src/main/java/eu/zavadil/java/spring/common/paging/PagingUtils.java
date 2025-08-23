@@ -3,6 +3,7 @@ package eu.zavadil.java.spring.common.paging;
 import org.springframework.data.domain.*;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -44,10 +45,12 @@ public class PagingUtils {
 		public int compare(T o1, T o2) {
 			for (Sort.Order order : sort) {
 				try {
-					Field field = o1.getClass().getDeclaredField(order.getProperty());
-					field.setAccessible(true);
-					Comparable val1 = (Comparable) field.get(o1);
-					Comparable val2 = (Comparable) field.get(o2);
+					Comparable val1 = (Comparable) getPropertyValue(o1, order.getProperty());
+					Comparable val2 = (Comparable) getPropertyValue(o2, order.getProperty());
+
+					if (val1 == null && val2 == null) continue;
+					if (val1 == null) return order.isAscending() ? -1 : 1;
+					if (val2 == null) return order.isAscending() ? 1 : -1;
 
 					int cmp = val1.compareTo(val2);
 					if (cmp != 0) {
@@ -58,6 +61,33 @@ public class PagingUtils {
 				}
 			}
 			return 0;
+		}
+
+		private Object getPropertyValue(Object obj, String property) throws Exception {
+			Class<?> clazz = obj.getClass();
+			// try direct field first
+			try {
+				Field field = clazz.getDeclaredField(property);
+				field.setAccessible(true);
+				return field.get(obj);
+			} catch (NoSuchFieldException ignored) {
+			}
+
+			// try getter method
+			String capitalized = property.substring(0, 1).toUpperCase() + property.substring(1);
+			String[] candidates = new String[]{
+				"get" + capitalized,
+				"is" + capitalized
+			};
+			for (String methodName : candidates) {
+				try {
+					Method m = clazz.getMethod(methodName);
+					return m.invoke(obj);
+				} catch (NoSuchMethodException ignored) {
+				}
+			}
+
+			throw new NoSuchFieldException("No field or getter for property: " + property);
 		}
 	}
 
