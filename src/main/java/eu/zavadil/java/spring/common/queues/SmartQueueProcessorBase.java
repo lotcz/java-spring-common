@@ -21,11 +21,20 @@ public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<
 
 	public abstract void processItem(T e);
 
+	public void onBeforeProcessing() {
+
+	}
+
+	public void onAfterProcessing() {
+
+	}
+
 	@Override
 	@Async
 	public void process() {
 		this.state = SmartQueueProcessorState.Processing;
 		try {
+			this.onBeforeProcessing();
 			while (this.queue.hasNext()) {
 				T n = this.queue.next();
 				if (n == null) {
@@ -33,6 +42,7 @@ public abstract class SmartQueueProcessorBase<T> implements SmartQueueProcessor<
 				}
 				this.processItem(n);
 			}
+			this.onAfterProcessing();
 		} finally {
 			this.queue.reset();
 			this.state = SmartQueueProcessorState.Idle;
