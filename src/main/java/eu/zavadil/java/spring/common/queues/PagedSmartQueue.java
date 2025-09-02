@@ -61,7 +61,7 @@ public abstract class PagedSmartQueue<T> implements SmartQueue<T> {
 	@Override
 	public long remaining() {
 		this.checkReload();
-		return this.currentPage == null ? 0 : this.currentPage.getTotalElements() - this.processedCount;
+		return this.currentPage == null ? 0 : this.currentPage.getTotalElements() - this.currentItemNumber;
 	}
 
 	@Override
