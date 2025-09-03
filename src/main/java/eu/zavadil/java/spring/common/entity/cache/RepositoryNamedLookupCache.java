@@ -42,7 +42,7 @@ public class RepositoryNamedLookupCache<T extends EntityWithNameBase> extends Re
 
 	public Page<T> search(String search, PageRequest pr) {
 		List<T> filtered = (StringUtils.isBlank(search)) ? this.all()
-			: this.all().stream().filter(item -> StringUtils.safeContains(item.getName(), search)).toList();
+			: this.all().stream().filter(item -> StringUtils.safeContainsIgnoreCase(item.getName(), search)).toList();
 		return PagingUtils.getPage(filtered, pr);
 	}
 
