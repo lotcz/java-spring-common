@@ -104,6 +104,10 @@ public class HttpApiClientBase {
 		return this.exchange(method, path, null, request, responseClass);
 	}
 
+	protected String exchange(HttpMethod method, String path, Map<String, String> queryParams) {
+		return this.exchange(method, path, queryParams, null, String.class);
+	}
+
 	protected <TRes> TRes get(String path, Map<String, String> queryParams, Class<TRes> responseClass) {
 		return this.exchange(HttpMethod.GET, path, queryParams, null, responseClass);
 	}
@@ -120,4 +124,29 @@ public class HttpApiClientBase {
 		return this.get(path, null, responseType);
 	}
 
+	protected <TReq, TRes> TRes put(String path, Map<String, String> queryParams, TReq request, Class<TRes> responseClass) {
+		return this.exchange(HttpMethod.PUT, path, queryParams, request, responseClass);
+	}
+
+	protected <TReq, TRes> TRes put(String path, TReq request, Class<TRes> responseClass) {
+		return this.put(path, null, request, responseClass);
+	}
+
+	protected <TReq, TRes> TRes post(String path, Map<String, String> queryParams, TReq request, Class<TRes> responseClass) {
+		return this.exchange(HttpMethod.POST, path, queryParams, request, responseClass);
+	}
+
+	protected <TReq, TRes> TRes post(String path, TReq request, Class<TRes> responseClass) {
+		return this.post(path, null, request, responseClass);
+	}
+
+	protected void delete(String path, Map<String, String> queryParams) {
+		this.exchange(HttpMethod.DELETE, path, queryParams);
+	}
+
+	protected void delete(String path) {
+		this.delete(path, null);
+	}
+
 }
+
