@@ -2,6 +2,7 @@ package eu.zavadil.java.spring.common.entity.cache;
 
 import eu.zavadil.java.spring.common.entity.EntityBase;
 import eu.zavadil.java.spring.common.entity.EntityRepository;
+import java.time.Duration;
 
 /**
  * Cache layer over repository.
@@ -12,6 +13,12 @@ public class RepositoryHashCache<T extends EntityBase> extends EntityCacheBase<T
 	protected final EntityRepository<T> repository;
 
 	public RepositoryHashCache(EntityRepository<T> repository) {
+		super();
+		this.repository = repository;
+	}
+
+	public RepositoryHashCache(EntityRepository<T> repository, int maxItems, Duration maxDuration) {
+		super(maxItems, maxDuration);
 		this.repository = repository;
 	}
 
